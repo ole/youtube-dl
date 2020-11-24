@@ -2581,6 +2581,12 @@ class YoutubeDLHandler(compat_urllib_request.HTTPHandler):
 
     @staticmethod
     def deflate(data):
+        # Patch applied: https://github.com/ytdl-org/youtube-dl/issues/7181#issuecomment-148377328
+        # HEAD requests produce no data, which is not a valid compressed file
+        # Works around "zlib.error: Error -5 while decompressing data: incomplete or truncated stream".
+        # This fixes youtube-dl on https://pointfree.co.
+        if not data:
+            return data
         try:
             return zlib.decompress(data, -zlib.MAX_WBITS)
         except zlib.error:
